@@ -8,6 +8,9 @@ WP_VERSION=`get_config_value 'wp_version' 'latest'`
 WP_TYPE=`get_config_value 'wp_type' "single"`
 DB_NAME=`get_config_value 'db_name' "${VVV_SITE_NAME}"`
 DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
+ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
+ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
+ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 
 # Make a database, if we don't already have one
 echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
@@ -44,7 +47,7 @@ if ! $(noroot wp core is-installed); then
     INSTALL_COMMAND="install"
   fi
 
-  noroot wp core ${INSTALL_COMMAND} --url="${DOMAIN}" --quiet --title="${SITE_TITLE}" --admin_name=admin --admin_email="admin@local.dev" --admin_password="password"
+  noroot wp core ${INSTALL_COMMAND} --url="${DOMAIN}" --quiet --title="${SITE_TITLE}" --admin_name="${ADMIN_NAME}" --admin_email="${ADMIN_EMAIL}" --admin_password="${ADMIN_PASSWORD}"
 else
   echo "Updating WordPress Stable..."
   cd ${VVV_PATH_TO_SITE}/public_html
@@ -53,3 +56,7 @@ fi
 
 cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+
+# Install bower & gulp
+echo "---Installing bower & gulp for dependency management & dev tools---"
+sudo npm install -g bower gulp-cli
