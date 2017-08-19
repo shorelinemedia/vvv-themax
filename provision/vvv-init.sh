@@ -31,8 +31,33 @@ fi
 
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-config.php" ]]; then
   echo "Configuring WordPress Stable..."
+  WP_CACHE_KEY_SALT=`date +%s | sha256sum | head -c 64`
   noroot wp core config --dbname="${DB_NAME}" --dbuser=wp --dbpass=wp --quiet --extra-php <<PHP
+
+define( 'WP_CACHE', true );
+define( 'WP_CACHE_KEY_SALT', '$WP_CACHE_KEY_SALT' );
 define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_LOG', true );
+define( 'WP_DEBUG_DISPLAY', false );
+define( 'SAVEQUERIES', false );
+define( 'JETPACK_DEV_DEBUG', true );
+@ini_set( 'display_errors', 0 );
+define( 'WP_LOCAL_DEV', true );
+define( 'WP_ENV', 'development' );
+
+/** Contact Form 7 **/
+// Stop adding <br> and <p> tags to forms and emails
+define ( 'WPCF7_AUTOP', false );
+// Restrict Access to the Contact Forms to Admins only
+define( 'WPCF7_ADMIN_READ_CAPABILITY', 'manage_options' );
+define( 'WPCF7_ADMIN_READ_WRITE_CAPABILITY', 'manage_options' );
+
+// Match any requests made via xip.io.
+if ( isset( \$_SERVER['HTTP_HOST'] ) && preg_match('/^(${VVV_SITE_NAME})\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(.xip.io)\z/', \$_SERVER['HTTP_HOST'] ) ) {
+define( 'WP_HOME', 'http://' . \$_SERVER['HTTP_HOST'] );
+define( 'WP_SITEURL', 'http://' . \$_SERVER['HTTP_HOST'] );
+}
+
 PHP
 fi
 
@@ -57,6 +82,20 @@ fi
 cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
+# Install Composer
+cd ${VVV_PATH_TO_SITE}
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('SHA384', 'composer-setup.php') === '669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+
+# Install composer required libraries
+cd ${VVV_PATH_TO_SITE}
+noroot composer update && noroot composer install
+
+# Activate plugins we installed with composer
+noroot wp plugin activate wordpress-seo mailchimp-for-wp members
+
 # Install bower & gulp
 echo "---Installing bower & gulp for dependency management & dev tools---"
-sudo npm install -g bower gulp-cli
+npm install -g bower gulp-cli

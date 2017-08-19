@@ -1,4 +1,7 @@
 
 /log/
 /provision/vvv-nginx.conf
+composer.phar
 /public_html
+composer.lock
+/vendor/
