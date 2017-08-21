@@ -11,6 +11,7 @@ DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
 ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
+REPO_HTDOCS=`get_config_value 'repo_htdocs' "https://bitbucket.org/shorelinemedia/shoreline-wpe-starter.git"`
 
 # Make a database, if we don't already have one
 echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
@@ -95,6 +96,16 @@ noroot composer update && noroot composer install
 
 # Activate plugins we installed with composer
 noroot wp plugin activate wordpress-seo mailchimp-for-wp members
+
+# Clone WPE Starter project into public_html
+if [[ ! -d "${VVV_PATH_TO_SITE}/public_html/shoreline-child" ]]; then 
+  if [ "${REPO_HTDOCS}" != "" ]; then
+    cd ${VVV_PATH_TO_SITE}/public_html
+    noroot git init
+    noroot git clone ${REPO_HTDOCS} .
+  fi
+fi
+
 
 # Install bower & gulp
 echo "---Installing bower & gulp for dependency management & dev tools---"
