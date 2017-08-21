@@ -11,7 +11,6 @@ DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
 ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
-REPO_HTDOCS=`get_config_value 'repo_htdocs' "https://bitbucket.org/shorelinemedia/shoreline-wpe-starter.git"`
 
 # Make a database, if we don't already have one
 echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
@@ -23,22 +22,6 @@ echo -e "\n DB operations done.\n\n"
 mkdir -p ${VVV_PATH_TO_SITE}/log
 touch ${VVV_PATH_TO_SITE}/log/error.log
 touch ${VVV_PATH_TO_SITE}/log/access.log
-
-# Clone WPE Starter project into public_html
-if [[ ! -d "${VVV_PATH_TO_SITE}/public_html/wp-content/themes/shoreline-child" ]]; then 
-  if [ "${REPO_HTDOCS}" != "" ]; then
-    cd ${VVV_PATH_TO_SITE}/public_html
-    noroot git init
-    noroot git remote add origin ${REPO_HTDOCS}
-    noroot git pull origin master
-    cd ${VVV_PATH_TO_SITE}/public_html/wp-content/themes/shoreline-child/
-    rm -rf *
-    rm -rf .git
-    git init
-    git remote add origin https://bitbucket.org/shorelinemedia/kleo-base-theme.git
-    git pull origin master    
-  fi
-fi
 
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
