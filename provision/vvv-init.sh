@@ -29,7 +29,14 @@ if [[ ! -d "${VVV_PATH_TO_SITE}/public_html/wp-content/themes/shoreline-child" ]
   if [ "${REPO_HTDOCS}" != "" ]; then
     cd ${VVV_PATH_TO_SITE}/public_html
     noroot git init
-    noroot git clone ${REPO_HTDOCS} .
+    noroot git remote add origin ${REPO_HTDOCS}
+    noroot git pull origin master
+    cd ${VVV_PATH_TO_SITE}/public_html/wp-content/themes/shoreline-child/
+    rm -rf *
+    rm -rf .git
+    git init
+    git remote add origin https://bitbucket.org/shorelinemedia/kleo-base-theme.git
+    git pull origin master    
   fi
 fi
 
