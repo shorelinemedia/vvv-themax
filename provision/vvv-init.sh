@@ -24,6 +24,15 @@ mkdir -p ${VVV_PATH_TO_SITE}/log
 touch ${VVV_PATH_TO_SITE}/log/error.log
 touch ${VVV_PATH_TO_SITE}/log/access.log
 
+# Clone WPE Starter project into public_html
+if [[ ! -d "${VVV_PATH_TO_SITE}/public_html/wp-content/themes/shoreline-child" ]]; then 
+  if [ "${REPO_HTDOCS}" != "" ]; then
+    cd ${VVV_PATH_TO_SITE}/public_html
+    noroot git init
+    noroot git clone ${REPO_HTDOCS} .
+  fi
+fi
+
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
     echo "Downloading WordPress..."
@@ -96,15 +105,6 @@ noroot composer update && noroot composer install
 
 # Activate plugins we installed with composer
 noroot wp plugin activate wordpress-seo mailchimp-for-wp members
-
-# Clone WPE Starter project into public_html
-if [[ ! -d "${VVV_PATH_TO_SITE}/public_html/shoreline-child" ]]; then 
-  if [ "${REPO_HTDOCS}" != "" ]; then
-    cd ${VVV_PATH_TO_SITE}/public_html
-    noroot git init
-    noroot git clone ${REPO_HTDOCS} .
-  fi
-fi
 
 
 # Install bower & gulp
