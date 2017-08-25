@@ -11,6 +11,29 @@ DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
 ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
+HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
+
+# Setup our WPEngine starter project in the htdocs/public_html folder
+# before that folder is created
+echo "\nChecking out WPEngine starter project at ${HTDOCS_REPO}"
+
+# If there is no public_html directory, create it
+if [[ ! -d "${VVV_PATH_TO_SITE}/public_html" ]]; then
+  cd ${VVV_PATH_TO_SITE} && mkdir public_html
+else
+  echo "\nThere's already an htdocs/public_html folder (skipping directory creation)"
+fi
+
+# Create git repository, add origin remote and do first pull
+cd ${VVV_PATH_TO_SITE}/public_html
+echo "\n Initializing git repo in htdocs/public_html folder"
+git init
+echo "\nAdding git remote"
+git remote add origin ${HTDOCS_REPO}
+echo "\nPulling master branch from ${HTDOCS_REPO}"
+git pull origin master
+cd ${VVV_PATH_TO_SITE}
+
 
 # Make a database, if we don't already have one
 echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
