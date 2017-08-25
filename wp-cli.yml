@@ -1,1 +1,4 @@
 path: public_html
+
+apache_modules:
+  - mod_rewrite
