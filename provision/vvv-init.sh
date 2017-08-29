@@ -31,7 +31,7 @@ git init
 echo "\nAdding git remote"
 git remote add origin ${HTDOCS_REPO}
 echo "\nPulling master branch from ${HTDOCS_REPO}"
-git pull origin master
+git pull --recurse-submodules origin master
 cd ${VVV_PATH_TO_SITE}
 
 
