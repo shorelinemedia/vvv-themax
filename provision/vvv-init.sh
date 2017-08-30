@@ -12,6 +12,28 @@ ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
+SSH_KEY=`get_config_value 'ssh_key' "~/.ssh/id_rsa"`
+
+# If we have an ssh_key in our config, create an SSH config file on host
+if [ -z "${SSH_KEY}"]; then
+  noroot cat <<EOF >> ~/.ssh/config
+
+Host bitbucket.org shoreline
+  HostName bitbucket.org
+  User git
+  IdentityFile ${SSH_KEY}
+  IdentitiesOnly yes
+  ForwardAgent yes
+
+Host github.com shoreline-github
+  Hostname github.com
+  User git
+  IdentityFile ${SSH_KEY}
+  IdentitiesOnly yes
+  ForwardAgent yes
+
+EOF
+fi
 
 # Setup our WPEngine starter project in the htdocs/public_html folder
 # before that folder is created
