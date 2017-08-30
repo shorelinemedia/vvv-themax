@@ -14,8 +14,7 @@ ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
 
 # Create an SSH config file on host to make sure host forwarding works
-if [ -z "${SSH_KEY}"]; then
-  noroot cat <<EOF >> ~/.ssh/config
+noroot cat <<EOF >> ~/.ssh/config
 
 Host bitbucket.org shoreline-bitbucket
   HostName bitbucket.org
@@ -30,7 +29,6 @@ Host github.com shoreline-github
   ForwardAgent yes
 
 EOF
-fi
 
 # Setup our WPEngine starter project in the htdocs/public_html folder
 # before that folder is created
