@@ -13,6 +13,34 @@ ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
 
+mailcatcher_setup() {
+  # Mailcatcher
+  #
+  # Installs mailcatcher using RVM. RVM allows us to install the
+  # current version of ruby and all mailcatcher dependencies reliably.
+  local pkg
+  local rvm_version
+  local mailcatcher_version
+
+  rvm_version="$(/usr/bin/env rvm --silent --version 2>&1 | grep 'rvm ' | cut -d " " -f 2)"
+  # RVM key D39DC0E3
+  # Signatures introduced in 1.26.0
+  gpg -q --no-tty --batch --keyserver "hkp://keyserver.ubuntu.com:80" --recv-keys D39DC0E3
+  gpg -q --no-tty --batch --keyserver "hkp://keyserver.ubuntu.com:80" --recv-keys BF04FF17
+
+  printf " * RVM [not installed]\n Installing from source"
+  curl --silent -L "https://raw.githubusercontent.com/rvm/rvm/stable/binscripts/rvm-installer" | sudo bash -s stable --ruby
+  source "/usr/local/rvm/scripts/rvm"
+
+  mailcatcher_version="$(/usr/bin/env mailcatcher --version 2>&1 | grep 'mailcatcher ' | cut -d " " -f 2)"
+  echo " * Mailcatcher [not installed]"
+  /usr/bin/env rvm default@mailcatcher --create do gem install mailcatcher --no-rdoc --no-ri
+  /usr/bin/env rvm wrapper default@mailcatcher --no-prefix mailcatcher catchmail
+
+}
+
+mailcatcher_setup
+
 # Create an SSH config file on host to make sure host forwarding works
 noroot cat <<EOF >> ~/.ssh/config
 
