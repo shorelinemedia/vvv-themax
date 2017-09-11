@@ -10,4 +10,7 @@ server {
     set          $upstream {upstream};
 
     include      /etc/nginx/nginx-wp-common.conf;
+
+    rewrite ^(.+)?/(wp-.*) $2 last;
 }
+
