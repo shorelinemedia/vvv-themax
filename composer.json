@@ -13,6 +13,10 @@
         "wpackagist": {
             "type": "composer",
             "url": "https://wpackagist.org"
+        },
+	"wpmudev": {
+            "type": "composer",
+            "url": "https://premium.wpmudev.org/"
         }
     },
     "minimum-stability": "dev",
@@ -26,7 +30,9 @@
         "wpackagist-plugin/genesis-visual-hook-guide": "^1.0",
         "wpackagist-plugin/autoptimize": "^2.2",
         "wpackagist-plugin/members": "^2.0",
-        "wpackagist-plugin/wordpress-seo": "^5.2"
+        "wpackagist-plugin/wordpress-seo": "^5.2",
+        "wpackagist-plugin/multisite-widgets-context": "^1.1",
+        "wpackagist-plugin/widget-importer-exporter": "^1.5"
     },
     "require-dev": {
         "wpackagist-plugin/debug-bar-extender": "^0.5",
@@ -36,7 +42,7 @@
         "wpackagist-plugin/user-switching": "^1.0",
         "wpackagist-plugin/what-the-file": "^1.4",
         "wpackagist-plugin/wp-crontrol": "^1.2",
-        "wpackagist-plugin/wp-hydra": "^1.0"
+        "wpackagist-plugin/gravityformscli": "^1.0"
     },
     "extra": {
         "installer-paths": {
