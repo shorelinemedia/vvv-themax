@@ -13,7 +13,6 @@ ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
 # Certificate domain should have no www
-CERT_DOMAIN=$(echo "$DOMAIN" | sed 's/^www.//')
 
 mailcatcher_setup() {
   # Mailcatcher
@@ -181,14 +180,13 @@ else
 fi
 
 # Replace nginx config
-sed -i "s#{{CERT_DOMAIN_HERE}}#${CERT_DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-service nginx restart
+sed -i "s#{{CERT_DOMAIN_HERE}}#${DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
 # Generate Self-Signed Cert
 openssl req -newkey rsa:2048 -x509 -nodes -keyout "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.key" -new \
 -out "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.cert" \
--subj "/CN=*.${CERT_DOMAIN}" \
+-subj "/CN=${DOMAIN}" \
 -reqexts SAN -extensions SAN \
--config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:*.${CERT_DOMAIN}")) \
+-config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${DOMAIN}")) \
 -sha256 -days 3650
 exit 0
