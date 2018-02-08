@@ -12,6 +12,8 @@ ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
+# Certificate domain should have no www
+CERT_DOMAIN=$(echo "$DOMAIN" | sed 's/^www.//')
 
 mailcatcher_setup() {
   # Mailcatcher
@@ -168,3 +170,25 @@ noroot wp plugin activate wordpress-seo mailchimp-for-wp members
 # Install bower & gulp
 echo "---Installing bower & gulp for dependency management & dev tools---"
 npm install -g bower gulp-cli
+
+### SSL ###
+
+# Create SSL directory to store certs/keys
+if [[ ! -d "${VVV_PATH_TO_SITE}/provision/ssl" ]]; then
+  cd ${VVV_PATH_TO_SITE}/provision/ && mkdir ssl
+else
+  echo "\nThere's already an provision/ssl folder (skipping directory creation)"
+fi
+
+# Replace nginx config
+sed -i "s#{{CERT_DOMAIN_HERE}}#${CERT_DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+service nginx restart
+
+# Generate Self-Signed Cert
+openssl req -newkey rsa:2048 -x509 -nodes -keyout "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.key" -new \
+-out "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.cert" \
+-subj "/CN=*.${CERT_DOMAIN}" \
+-reqexts SAN -extensions SAN \
+-config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:*.${CERT_DOMAIN}")) \
+-sha256 -days 3650
+exit 0
