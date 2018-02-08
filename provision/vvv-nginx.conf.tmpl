@@ -11,12 +11,6 @@ server {
 
     include      /etc/nginx/nginx-wp-common.conf;
 
-#   rewrite (.+)?(^wp-.*) /$2 last;
-#   rewrite ^(.+)?/(wp-.*) /$2 last;
-#   rewrite ^(.+)?/(wp-(content|admin|includes).*) /$2 last;
-    rewrite ^(.+)?\/(wp-(content(?!\.css)|admin|includes).*) /$2 last;
-    rewrite ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 last;
-
     ssl on;
     ssl_certificate {vvv_path_to_site}/provision/ssl/{{CERT_DOMAIN_HERE}}.cert;
     ssl_certificate_key {vvv_path_to_site}/provision/ssl/{{CERT_DOMAIN_HERE}}.key;
