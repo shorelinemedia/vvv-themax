@@ -12,7 +12,6 @@ ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' "git@bitbucket.org:shorelinemedia/shoreline-wpe-starter.git"`
-# Certificate domain should have no www
 
 mailcatcher_setup() {
   # Mailcatcher
@@ -174,19 +173,43 @@ npm install -g bower gulp-cli
 
 # Create SSL directory to store certs/keys
 if [[ ! -d "${VVV_PATH_TO_SITE}/provision/ssl" ]]; then
-  cd ${VVV_PATH_TO_SITE}/provision/ && mkdir ssl
+  mkdir ${VVV_PATH_TO_SITE}/provision/ssl
+
+  # Generate Self-Signed Cert
+  openssl req -newkey rsa:2048 -x509 -nodes -keyout "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.key" -new \
+  -out "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.cert" \
+  -subj "/CN=${DOMAIN}" \
+  -reqexts SAN -extensions SAN \
+  -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${DOMAIN}")) \
+  -sha256 -days 3650
+
 else
-  echo "\nThere's already an provision/ssl folder (skipping directory creation)"
+  echo "\nThere's already an provision/ssl folder (skipping ssl cert creation)"
 fi
+
 
 # Replace nginx config
 sed -i "s#{{CERT_DOMAIN_HERE}}#${DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
-# Generate Self-Signed Cert
-openssl req -newkey rsa:2048 -x509 -nodes -keyout "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.key" -new \
--out "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.cert" \
--subj "/CN=${DOMAIN}" \
--reqexts SAN -extensions SAN \
--config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${DOMAIN}")) \
--sha256 -days 3650
-exit 0
+
+# Install Liquidprompt on first provision only
+if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
+  noroot mkdir /home/vagrant/liquidprompt
+  noroot git clone https://github.com/nojhan/liquidprompt.git /home/vagrant/liquidprompt
+  source /home/vagrant/liquidprompt/liquidprompt
+
+  # Copy liquidprompt config
+  noroot cp /home/vagrant/liquidprompt/liquidpromptrc-dist /home/vagrant/.config/liquidpromptrc
+
+  # Add to .bashrc
+  noroot cat <<EOF >> /home/vagrant/.bashrc
+
+# Only load Liquid Prompt in interactive shells, not from a script or from scp
+[[ $- = *i* ]] && source /home/vagrant/liquidprompt/liquidprompt
+
+EOF
+
+  # Update settings in config
+  PATHLENGTH=16
+  sed "s/LP_PATH_LENGTH\=[0-9]*/LP_PATH_LENGTH=${PATHLENGTH}/" /home/vagrant/.config/liquidpromptrc
+fi
