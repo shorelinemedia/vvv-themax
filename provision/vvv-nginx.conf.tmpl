@@ -12,6 +12,6 @@ server {
     include      /etc/nginx/nginx-wp-common.conf;
 
     ssl on;
-    ssl_certificate /home/vagrant/certificates/{vvv_db_name}/dev.crt;
-    ssl_certificate_key /home/vagrant/certificates/{vvv_db_name}/dev.key;
+    ssl_certificate /vagrant/certificates/{vvv_db_name}/dev.crt;
+    ssl_certificate_key /vagrant/certificates/{vvv_db_name}/dev.key;
 }
