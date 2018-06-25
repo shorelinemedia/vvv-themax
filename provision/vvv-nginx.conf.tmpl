@@ -18,6 +18,6 @@ server {
     rewrite ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 last;
 
     ssl on;
-    ssl_certificate {vvv_path_to_site}/provision/ssl/{{CERT_DOMAIN_HERE}}.cert;
-    ssl_certificate_key {vvv_path_to_site}/provision/ssl/{{CERT_DOMAIN_HERE}}.key;
+    ssl_certificate /vagrant/certificates/{vvv_db_name}/dev.crt;
+    ssl_certificate_key /vagrant/certificates/{vvv_db_name}/dev.key;
 }
