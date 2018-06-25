@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Provision WordPress Stable
 
-DOMAIN=`get_primary_host "${VVV_SITE_NAME}".dev`
+DOMAIN=`get_primary_host "${VVV_SITE_NAME}".test`
 DOMAINS=`get_hosts "${DOMAIN}"`
 SITE_TITLE=`get_config_value 'site_title' "${DOMAIN}"`
 WP_VERSION=`get_config_value 'wp_version' 'latest'`
@@ -171,25 +171,8 @@ npm install -g bower gulp-cli
 
 ### SSL ###
 
-# Create SSL directory to store certs/keys
-if [[ ! -d "${VVV_PATH_TO_SITE}/provision/ssl" ]]; then
-  mkdir ${VVV_PATH_TO_SITE}/provision/ssl
-
-  # Generate Self-Signed Cert
-  openssl req -newkey rsa:2048 -x509 -nodes -keyout "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.key" -new \
-  -out "${VVV_PATH_TO_SITE}/provision/ssl/${DOMAIN}.cert" \
-  -subj "/CN=${DOMAIN}" \
-  -reqexts SAN -extensions SAN \
-  -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName=DNS:${DOMAIN}")) \
-  -sha256 -days 3650
-
-else
-  echo "\nThere's already an provision/ssl folder (skipping ssl cert creation)"
-fi
-
-
-# Replace nginx config
-sed -i "s#{{CERT_DOMAIN_HERE}}#${DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+# Replace nginx config with location of custom site certificates
+sed -i "s#{vvv_db_name}#${DB_NAME}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
 
 # Install Liquidprompt on first provision only
