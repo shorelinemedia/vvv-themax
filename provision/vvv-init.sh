@@ -118,6 +118,8 @@ define( 'JETPACK_DEV_DEBUG', true );
 @ini_set( 'display_errors', 0 );
 define( 'WP_LOCAL_DEV', true );
 define( 'WP_ENV', 'development' );
+// Disable File Editor
+define('DISALLOW_FILE_EDIT', true);
 
 /** Contact Form 7 **/
 // Stop adding <br> and <p> tags to forms and emails
