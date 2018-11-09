@@ -41,6 +41,14 @@ mailcatcher_setup() {
 
 mailcatcher_setup
 
+# Update permissions for SSH Keys
+if [ -f "/home/vagrant/.ssh/id_rsa" ]; then
+  chmod 600 /home/vagrant/.ssh/id_rsa
+fi
+if [ -f "/home/vagrant/.ssh/id_rsa.pub" ]; then
+  chmod 644 /home/vagrant/.ssh/id_rsa.pub
+fi
+
 # Create an SSH config file on host to make sure host forwarding works
 noroot cat <<EOF >> ~/.ssh/config
 
