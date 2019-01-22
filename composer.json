@@ -32,7 +32,8 @@
         "wpackagist-plugin/members": "^2.0",
         "wpackagist-plugin/wordpress-seo": "^5.2",
         "wpackagist-plugin/multisite-widgets-context": "^1.1",
-        "wpackagist-plugin/widget-importer-exporter": "^1.5"
+        "wpackagist-plugin/widget-importer-exporter": "^1.5",
+        "wpackagist-plugin/threewp-broadcast": "^43.14"
     },
     "require-dev": {
         "wpackagist-plugin/debug-bar-extender": "^0.5",
