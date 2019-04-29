@@ -9,9 +9,12 @@ server {
 
     set          $upstream {upstream};
 
+    # Enable server push if SSL/HTTP2 is being used for link preload headers
+    http2_push_preload on;
+
+    {{TLS_CERT}}
+    {{TLS_KEY}}
+
     include      /etc/nginx/nginx-wp-common.conf;
 
-    ssl on;
-    ssl_certificate /vagrant/certificates/{vvv_db_name}/dev.crt;
-    ssl_certificate_key /vagrant/certificates/{vvv_db_name}/dev.key;
 }
