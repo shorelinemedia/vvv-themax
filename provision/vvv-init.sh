@@ -163,9 +163,6 @@ else
   noroot wp core update --version="${WP_VERSION}"
 fi
 
-cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-
 # Install Composer
 cd ${VVV_PATH_TO_SITE}
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
@@ -185,12 +182,16 @@ noroot wp plugin activate wordpress-seo mailchimp-for-wp members
 echo "---Installing bower & gulp for dependency management & dev tools---"
 npm install -g bower gulp-cli
 
+# Copy nginx config template
+cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+
+# Replace domains in config template
+sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+
 ### SSL ###
 
 # Replace nginx config with location of custom site certificates
 sed -i "s#{vvv_db_name}#${DB_NAME}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-
-cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
 if [ -n "$(type -t is_utility_installed)" ] && [ "$(type -t is_utility_installed)" = function ] && `is_utility_installed core tls-ca`; then
     sed -i "s#{{TLS_CERT}}#ssl_certificate /vagrant/certificates/${VVV_SITE_NAME}/dev.crt;#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
