@@ -128,6 +128,11 @@ define( 'WP_LOCAL_DEV', true );
 define( 'WP_ENV', 'development' );
 // Disable File Editor
 define('DISALLOW_FILE_EDIT', true);
+/** WP ROCKET DISABLED DURING LOCAL DEV**/
+define( 'DONOTCACHEPAGE', true );
+define( 'DONOTROCKETOPTIMIZE', true );
+
+
 
 /** Contact Form 7 **/
 // Stop adding <br> and <p> tags to forms and emails
