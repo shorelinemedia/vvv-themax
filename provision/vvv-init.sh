@@ -121,6 +121,7 @@ define( 'WP_CACHE_KEY_SALT', '$WP_CACHE_KEY_SALT' );
 define( 'WP_DEBUG', true );
 define( 'WP_DEBUG_LOG', true );
 define( 'WP_DEBUG_DISPLAY', false );
+define( 'WP_DISABLE_FATAL_ERROR_HANDLER', true );
 define( 'SAVEQUERIES', false );
 define( 'JETPACK_DEV_DEBUG', true );
 @ini_set( 'display_errors', 0 );
