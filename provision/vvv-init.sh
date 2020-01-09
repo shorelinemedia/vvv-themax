@@ -180,9 +180,6 @@ php -r "unlink('composer-setup.php');"
 cd ${VVV_PATH_TO_SITE}
 noroot composer update && noroot composer install
 
-# Activate plugins we installed with composer
-noroot wp plugin activate wordpress-seo mailchimp-for-wp members
-
 # Install yarn as a new alternative to npm
 curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
