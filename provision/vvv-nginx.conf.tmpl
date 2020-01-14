@@ -14,6 +14,21 @@ server {
 
     {{TLS_CERT}}
     {{TLS_KEY}}
+    
+    # WebP Express rules
+    # --------------------
+    location ~* ^/?wp-content/.*\.(png|jpe?g)$ {
+      add_header Vary Accept;
+      expires 365d;
+      if ($http_accept !~* "webp"){
+        break;
+      }
+      try_files
+        /wp-content/webp-express/webp-images/doc-root/$uri.webp
+        $uri.webp
+        /wp-content/plugins/webp-express/wod/webp-on-demand.php?xsource=x$request_filename&wp-content=wp-content
+        ;
+    }
 
     include      /etc/nginx/nginx-wp-common.conf;
 
