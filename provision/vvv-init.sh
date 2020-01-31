@@ -189,7 +189,7 @@ sudo apt install --no-install-recommends yarn
 
 # Install bower & gulp
 echo "---Installing bower & gulp for dependency management & dev tools---"
-npm install -g bower gulp-cli
+yarn global add bower gulp-cli
 
 # Copy nginx config template
 cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
