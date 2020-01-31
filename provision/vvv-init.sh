@@ -173,9 +173,16 @@ noroot composer update && noroot composer install
 noroot wp plugin activate wordpress-seo mailchimp-for-wp members
 
 
+# Install yarn as a new alternative to npm
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+
+sudo apt update
+sudo apt install --no-install-recommends yarn
+
 # Install bower & gulp
 echo "---Installing bower & gulp for dependency management & dev tools---"
-npm install -g bower gulp-cli
+yarn global add bower gulp-cli
 
 ### SSL ###
 
