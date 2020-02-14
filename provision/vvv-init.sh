@@ -132,6 +132,8 @@ define('DISALLOW_FILE_EDIT', true);
 /** WP ROCKET DISABLED DURING LOCAL DEV**/
 define( 'DONOTCACHEPAGE', true );
 define( 'DONOTROCKETOPTIMIZE', true );
+/* Don't send email using WP-SMTP plugin when running locally */
+define( 'WPMS_DO_NOT_SEND', true );
 
 
 
