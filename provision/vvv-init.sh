@@ -132,8 +132,12 @@ define('DISALLOW_FILE_EDIT', true);
 /** WP ROCKET DISABLED DURING LOCAL DEV**/
 define( 'DONOTCACHEPAGE', true );
 define( 'DONOTROCKETOPTIMIZE', true );
-/* Don't send email using WP-SMTP plugin when running locally */
-define( 'WPMS_DO_NOT_SEND', true );
+/* WP MAIL SMTP Force sending to mailhog locally */
+define( 'WPMS_ON', true );
+define( 'WPMS_MAILER', 'smtp' );
+define( 'WPMS_SMTP_HOST', 'vvv.test' );
+define( 'WPMS_SMTP_PORT', '1025' );
+define( 'WPMS_SMTP_AUTH', false );
 
 
 
