@@ -10,6 +10,7 @@ DOMAINS=`get_hosts "${DOMAIN}"`
 SITE_TITLE=`get_config_value 'site_title' "${DOMAIN}"`
 WP_VERSION=`get_config_value 'wp_version' 'latest'`
 WP_TYPE=`get_config_value 'wp_type' "single"`
+WP_LOCALE=$(get_config_value 'locale' 'en_US')
 DB_NAME=`get_config_value 'db_name' "${VVV_SITE_NAME}"`
 DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
 ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
@@ -169,6 +170,10 @@ install_composer() {
 setup_database
 setup_nginx_folders
 
+# Setup Nginx config
+copy_nginx_configs
+
+
 cd ${VVV_PATH_TO_SITE}/public_html
 
 if [ -z "${HTDOCS_REPO}" ]; then
@@ -195,9 +200,6 @@ if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
     echo "Downloading WordPress..."
 	noroot wp core download --version="${WP_VERSION}"
 fi
-
-# Setup Nginx config
-copy_nginx_configs
 
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-config.php" ]]; then
   initial_wpconfig
