@@ -176,7 +176,7 @@ copy_nginx_configs
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
-if [ -z "$HTDOCS_REPO" ]; then
+if [ ! -z "$HTDOCS_REPO" ]; then
 
   # Setup our WPEngine starter project in the htdocs/public_html folder
   # before that folder is created
