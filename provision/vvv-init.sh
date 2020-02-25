@@ -17,6 +17,15 @@ ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' ""`
 
+# Make a database, if we don't already have one
+setup_database() {
+  echo -e " * Creating database '${DB_NAME}' (if it's not already there)"
+  mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`"
+  echo -e " * Granting the wp user priviledges to the '${DB_NAME}' database"
+  mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO wp@localhost IDENTIFIED BY 'wp';"
+  echo -e " * DB operations done."
+}
+
 setup_nginx_folders() {
   echo " * Setting up the log subfolder for Nginx logs"
   noroot mkdir -p "${VVV_PATH_TO_SITE}/log"
@@ -60,6 +69,7 @@ END_HEREDOC
   fi
 }
 
+setup_database
 setup_nginx_folders
 
 cd ${VVV_PATH_TO_SITE}/public_html
@@ -83,18 +93,14 @@ if [ -z "${HTDOCS_REPO}" ]; then
 fi
 
 
-# Make a database, if we don't already have one
-echo -e "\nCreating database '${DB_NAME}' (if it's not already there)"
-mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
-mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO wp@localhost IDENTIFIED BY 'wp';"
-echo -e "\n DB operations done.\n\n"
-
-
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
     echo "Downloading WordPress..."
 	noroot wp core download --version="${WP_VERSION}"
 fi
+
+# Setup Nginx config
+copy_nginx_configs
 
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-config.php" ]]; then
   echo "Configuring WordPress Stable..."
@@ -184,9 +190,6 @@ yarn global add bower gulp-cli
 
 # Replace domains in config template
 sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-
-# Setup Nginx config
-copy_nginx_configs
 
 # Install Liquidprompt on first provision only
 if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
