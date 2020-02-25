@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 # Provision WordPress Stable
 
+set -eo pipefail
+
+echo " * Custom site template provisioner ${VVV_SITE_NAME} - downloads and installs a copy of WP stable for testing, building client sites, etc"
+
 DOMAIN=`get_primary_host "${VVV_SITE_NAME}".test`
 DOMAINS=`get_hosts "${DOMAIN}"`
 SITE_TITLE=`get_config_value 'site_title' "${DOMAIN}"`
@@ -12,6 +16,40 @@ ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
 ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' ""`
+
+copy_nginx_configs() {
+  echo " * Copying the sites Nginx config template"
+  if [ -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-custom.conf" ]; then
+    echo " * A vvv-nginx-custom.conf file was found"
+    cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-custom.conf" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  else
+    echo " * Using the default vvv-nginx-default.conf, to customize, create a vvv-nginx-custom.conf"
+    cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-default.conf" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  fi
+
+  LIVE_URL=$(get_config_value 'live_url' '')
+  if [ ! -z "$LIVE_URL" ]; then
+    echo " * Adding support for Live URL redirects to NGINX of the website's media"
+    # replace potential protocols, and remove trailing slashes
+    LIVE_URL=$(echo "${LIVE_URL}" | sed 's|https://||' | sed 's|http://||'  | sed 's:/*$::')
+
+    redirect_config=$((cat <<END_HEREDOC
+if (!-e \$request_filename) {
+  rewrite ^/[_0-9a-zA-Z-]+(/wp-content/uploads/.*) \$1;
+}
+if (!-e \$request_filename) {
+  rewrite ^/wp-content/uploads/(.*)\$ \$scheme://${LIVE_URL}/wp-content/uploads/\$1 redirect;
+}
+END_HEREDOC
+    ) |
+    # pipe and escape new lines of the HEREDOC for usage in sed
+    sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n\\1/g'
+    )
+    sed -i -e "s|\(.*\){{LIVE_URL}}|\1${redirect_config}|" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  else
+    sed -i "s#{{LIVE_URL}}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  fi
+}
 
 mailcatcher_setup() {
   # Mailcatcher
@@ -40,31 +78,6 @@ mailcatcher_setup() {
 }
 
 mailcatcher_setup
-
-# Update permissions for SSH Keys
-if [ -f "/home/vagrant/.ssh/id_rsa" ]; then
-  chmod 600 /home/vagrant/.ssh/id_rsa
-fi
-if [ -f "/home/vagrant/.ssh/id_rsa.pub" ]; then
-  chmod 644 /home/vagrant/.ssh/id_rsa.pub
-fi
-
-# Create an SSH config file on host to make sure host forwarding works
-noroot cat <<EOF >> ~/.ssh/config
-
-Host bitbucket.org shoreline-bitbucket
-  HostName bitbucket.org
-  User git
-  IdentitiesOnly yes
-  ForwardAgent yes
-
-Host github.com shoreline-github
-  Hostname github.com
-  User git
-  IdentitiesOnly yes
-  ForwardAgent yes
-
-EOF
 
 # If there is no public_html directory, create it
 if [[ ! -d "${VVV_PATH_TO_SITE}/public_html" ]]; then
@@ -197,24 +210,11 @@ sudo apt install --no-install-recommends yarn
 echo "---Installing bower & gulp for dependency management & dev tools---"
 yarn global add bower gulp-cli
 
-# Copy nginx config template
-cp -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf.tmpl" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-
 # Replace domains in config template
 sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
-### SSL ###
-
-# Replace nginx config with location of custom site certificates
-sed -i "s#{vvv_db_name}#${DB_NAME}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-
-if [ -n "$(type -t is_utility_installed)" ] && [ "$(type -t is_utility_installed)" = function ] && `is_utility_installed core tls-ca`; then
-    sed -i "s#{{TLS_CERT}}#ssl_certificate /vagrant/certificates/${VVV_SITE_NAME}/dev.crt;#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-    sed -i "s#{{TLS_KEY}}#ssl_certificate_key /vagrant/certificates/${VVV_SITE_NAME}/dev.key;#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-else
-    sed -i "s#{{TLS_CERT}}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-    sed -i "s#{{TLS_KEY}}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
-fi
+# Setup Nginx config
+copy_nginx_configs
 
 # Install Liquidprompt on first provision only
 if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
