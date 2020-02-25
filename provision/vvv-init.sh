@@ -72,7 +72,7 @@ END_HEREDOC
 
 initial_wpconfig() {
   echo "Configuring WordPress Stable..."
-  WP_CACHE_KEY_SALT=$(date +%s | sha256sum | head -c 64)
+  WP_CACHE_KEY_SALT=`date +%s | sha256sum | head -c 64`
   noroot wp core config --dbname="${DB_NAME}" --dbuser=wp --dbpass=wp --quiet --extra-php <<PHP
 
 define( 'WP_CACHE', true );
