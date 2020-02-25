@@ -18,6 +18,17 @@ ADMIN_EMAIL=$(get_config_value 'admin_email' 'team@shoreline.media')
 ADMIN_PASSWORD=$(get_config_value 'admin_password' 'password')
 HTDOCS_REPO=$(get_config_value 'htdocs' '')
 
+# Configure SSH Key permissions
+configure_keys() {
+  # Update permissions for SSH Keys
+  if [ -f "/home/vagrant/.ssh/id_rsa" ]; then
+    chmod 600 /home/vagrant/.ssh/id_rsa
+  fi
+  if [ -f "/home/vagrant/.ssh/id_rsa.pub" ]; then
+    chmod 644 /home/vagrant/.ssh/id_rsa.pub
+  fi
+}
+
 # Make a database, if we don't already have one
 setup_database() {
   echo -e " * Creating database '${DB_NAME}' (if it's not already there)"
@@ -167,6 +178,7 @@ install_composer() {
   noroot composer update && noroot composer install
 }
 
+configure_keys
 setup_database
 setup_nginx_folders
 
