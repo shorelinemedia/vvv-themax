@@ -17,6 +17,15 @@ ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
 ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
 HTDOCS_REPO=`get_config_value 'htdocs' ""`
 
+setup_nginx_folders() {
+  echo " * Setting up the log subfolder for Nginx logs"
+  noroot mkdir -p "${VVV_PATH_TO_SITE}/log"
+  noroot touch "${VVV_PATH_TO_SITE}/log/nginx-error.log"
+  noroot touch "${VVV_PATH_TO_SITE}/log/nginx-access.log"
+  echo " * Creating public_html folder if it doesn't exist already"
+  noroot mkdir -p "${VVV_PATH_TO_SITE}/public_html"
+}
+
 copy_nginx_configs() {
   echo " * Copying the sites Nginx config template"
   if [ -f "${VVV_PATH_TO_SITE}/provision/vvv-nginx-custom.conf" ]; then
@@ -51,40 +60,6 @@ END_HEREDOC
   fi
 }
 
-mailcatcher_setup() {
-  # Mailcatcher
-  #
-  # Installs mailcatcher using RVM. RVM allows us to install the
-  # current version of ruby and all mailcatcher dependencies reliably.
-  local pkg
-  local rvm_version
-  local mailcatcher_version
-
-  rvm_version="$(/usr/bin/env rvm --silent --version 2>&1 | grep 'rvm ' | cut -d " " -f 2)"
-  # RVM key D39DC0E3
-  # Signatures introduced in 1.26.0
-  gpg -q --no-tty --batch --keyserver "hkp://keyserver.ubuntu.com:80" --recv-keys D39DC0E3
-  gpg -q --no-tty --batch --keyserver "hkp://keyserver.ubuntu.com:80" --recv-keys BF04FF17
-
-  printf " * RVM [not installed]\n Installing from source"
-  curl --silent -L "https://raw.githubusercontent.com/rvm/rvm/stable/binscripts/rvm-installer" | sudo bash -s stable --ruby
-  source "/usr/local/rvm/scripts/rvm"
-
-  mailcatcher_version="$(/usr/bin/env mailcatcher --version 2>&1 | grep 'mailcatcher ' | cut -d " " -f 2)"
-  echo " * Mailcatcher [not installed]"
-  /usr/bin/env rvm default@mailcatcher --create do gem install mailcatcher --no-rdoc --no-ri
-  /usr/bin/env rvm wrapper default@mailcatcher --no-prefix mailcatcher catchmail
-
-}
-
-mailcatcher_setup
-
-# If there is no public_html directory, create it
-if [[ ! -d "${VVV_PATH_TO_SITE}/public_html" ]]; then
-  cd ${VVV_PATH_TO_SITE} && mkdir public_html
-else
-  echo "\nThere's already an htdocs/public_html folder (skipping directory creation)"
-fi
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
@@ -113,10 +88,7 @@ mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO wp@localhost IDENTIFIED BY 'wp';"
 echo -e "\n DB operations done.\n\n"
 
-# Nginx Logs
-mkdir -p ${VVV_PATH_TO_SITE}/log
-touch ${VVV_PATH_TO_SITE}/log/error.log
-touch ${VVV_PATH_TO_SITE}/log/access.log
+setup_nginx_folders
 
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
