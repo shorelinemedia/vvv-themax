@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Provision WordPress Stable
 
-set -eo pipefail
+#set -eo pipefail
 
 echo " * Custom site template provisioner ${VVV_SITE_NAME} - downloads and installs a copy of WP stable for testing, building client sites, etc"
 
@@ -173,6 +173,8 @@ setup_nginx_folders
 # Setup Nginx config
 copy_nginx_configs
 
+# Replace domains in config template
+sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
@@ -226,9 +228,6 @@ fi
 install_composer
 install_yarn
 yarn_global
-
-# Replace domains in config template
-sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
 
 # Install Liquidprompt on first provision only
 if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
