@@ -5,18 +5,18 @@ set -eo pipefail
 
 echo " * Custom site template provisioner ${VVV_SITE_NAME} - downloads and installs a copy of WP stable for testing, building client sites, etc"
 
-DOMAIN=`get_primary_host "${VVV_SITE_NAME}".test`
-DOMAINS=`get_hosts "${DOMAIN}"`
-SITE_TITLE=`get_config_value 'site_title' "${DOMAIN}"`
-WP_VERSION=`get_config_value 'wp_version' 'latest'`
-WP_TYPE=`get_config_value 'wp_type' "single"`
+DOMAIN=$(get_primary_host "${VVV_SITE_NAME}".test)
+DOMAINS=$(get_hosts "${DOMAIN}")
+SITE_TITLE=$(get_config_value 'site_title' "${DOMAIN}")
+WP_VERSION=$(get_config_value 'wp_version' 'latest')
+WP_TYPE=$(get_config_value 'wp_type' "single")
 WP_LOCALE=$(get_config_value 'locale' 'en_US')
-DB_NAME=`get_config_value 'db_name' "${VVV_SITE_NAME}"`
+DB_NAME=$(get_config_value 'db_name' "${VVV_SITE_NAME}")
 DB_NAME=${DB_NAME//[\\\/\.\<\>\:\"\'\|\?\!\*-]/}
-ADMIN_NAME=`get_config_value 'admin_name' "shoreline-admin"`
-ADMIN_EMAIL=`get_config_value 'admin_email' "team@shoreline.media"`
-ADMIN_PASSWORD=`get_config_value 'admin_password' "password"`
-HTDOCS_REPO=`get_config_value 'htdocs' ""`
+ADMIN_NAME=$(get_config_value 'admin_name' 'shoreline-admin')
+ADMIN_EMAIL=$(get_config_value 'admin_email' 'team@shoreline.media')
+ADMIN_PASSWORD=$(get_config_value 'admin_password' 'password')
+HTDOCS_REPO=$(get_config_value 'htdocs' '')
 
 # Make a database, if we don't already have one
 setup_database() {
@@ -72,7 +72,7 @@ END_HEREDOC
 
 initial_wpconfig() {
   echo "Configuring WordPress Stable..."
-  WP_CACHE_KEY_SALT=`date +%s | sha256sum | head -c 64`
+  WP_CACHE_KEY_SALT=$(date +%s | sha256sum | head -c 64)
   noroot wp core config --dbname="${DB_NAME}" --dbuser=wp --dbpass=wp --quiet --extra-php <<PHP
 
 define( 'WP_CACHE', true );
@@ -176,19 +176,19 @@ copy_nginx_configs
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
-if [ -z "${HTDOCS_REPO}" ]; then
+if [ -z "$HTDOCS_REPO" ]; then
 
   # Setup our WPEngine starter project in the htdocs/public_html folder
   # before that folder is created
-  echo "\nChecking out WPEngine starter project at ${HTDOCS_REPO}"
+  echo "Checking out WPEngine starter project at ${HTDOCS_REPO}"
 
 
   # Create git repository, add origin remote and do first pull
-  echo "\n Initializing git repo in htdocs/public_html folder"
+  echo "Initializing git repo in htdocs/public_html folder"
   git init
-  echo "\nAdding git remote"
-  git remote add origin ${HTDOCS_REPO}
-  echo "\nPulling master branch from ${HTDOCS_REPO}"
+  echo "Adding git remote"
+  git remote add origin "${HTDOCS_REPO}"
+  echo "Pulling master branch from ${HTDOCS_REPO}"
   git pull --recurse-submodules origin master
   cd ${VVV_PATH_TO_SITE}
 
