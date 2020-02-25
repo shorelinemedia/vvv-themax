@@ -60,6 +60,7 @@ END_HEREDOC
   fi
 }
 
+setup_nginx_folders
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
@@ -88,7 +89,6 @@ mysql -u root --password=root -e "CREATE DATABASE IF NOT EXISTS ${DB_NAME}"
 mysql -u root --password=root -e "GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO wp@localhost IDENTIFIED BY 'wp';"
 echo -e "\n DB operations done.\n\n"
 
-setup_nginx_folders
 
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
