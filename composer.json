@@ -25,8 +25,7 @@
         "wpackagist-plugin/akismet": "^3.3",
         "wpackagist-plugin/wordpress-seo": "^11.0",
         "wpackagist-plugin/mailchimp-for-wp": "^4.5",
-        "wpackagist-plugin/members": "^2.1",
-        "roots/soil": "^3.7"
+        "wpackagist-plugin/members": "^2.1"
     },
     "require-dev": {
         "wpackagist-plugin/log-deprecated-notices": "^0.4.0",
