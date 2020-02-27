@@ -9,16 +9,27 @@
             "email": "team@shoreline.media"
         }
     ],
-    "repositories":{
-      "wpackagist": {
+    "repositories": [
+      {
           "type": "composer",
           "url": "https://wpackagist.org"
       },
-       "wpmudev": {
+      {
           "type": "composer",
           "url": "https://premium.wpmudev.org/"
+      },
+      {
+          "type": "package",
+          "package": {
+              "name": "afragen/github-updater",
+              "type": "wordpress-plugin",
+              "version": "0",
+              "require": {
+                  "composer/installers": "^1"
+              }
+          }
       }
-    },
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
