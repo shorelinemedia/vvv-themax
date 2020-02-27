@@ -9,15 +9,15 @@
             "email": "team@shoreline.media"
         }
     ],
-    "repositories": {
-        "wpackagist": {
-            "type": "composer",
-            "url": "https://wpackagist.org"
-        },
-	"wpmudev": {
-            "type": "composer",
-            "url": "https://premium.wpmudev.org/"
-        }
+    "repositories":{
+      "wpackagist": {
+          "type": "composer",
+          "url": "https://wpackagist.org"
+      },
+       "wpmudev": {
+          "type": "composer",
+          "url": "https://premium.wpmudev.org/"
+      }
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -26,7 +26,9 @@
         "wpackagist-plugin/wordpress-seo": ">=11.0",
         "wpackagist-plugin/mailchimp-for-wp": ">=4.5",
         "wpackagist-plugin/members": ">=2.1",
-        "wpackagist-plugin/contactic": ">=1.4.0"
+        "wpackagist-plugin/contactic": ">=1.4.0",
+        "wpackagist-plugin/disable-gutenberg": "^2.0",
+        "afragen/github-updater": "^9.3"
     },
     "require-dev": {
         "wpackagist-plugin/log-deprecated-notices": ">=0.4.0",
