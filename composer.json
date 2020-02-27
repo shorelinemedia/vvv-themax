@@ -22,24 +22,25 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "wpackagist-plugin/akismet": "^3.3",
-        "wpackagist-plugin/wordpress-seo": "^11.0",
-        "wpackagist-plugin/mailchimp-for-wp": "^4.5",
-        "wpackagist-plugin/members": "^2.1"
+        "wpackagist-plugin/akismet": ">=3.3",
+        "wpackagist-plugin/wordpress-seo": ">=11.0",
+        "wpackagist-plugin/mailchimp-for-wp": ">=4.5",
+        "wpackagist-plugin/members": ">=2.1",
+        "wpackagist-plugin/contactic": ">=1.4.0"
     },
     "require-dev": {
-        "wpackagist-plugin/log-deprecated-notices": "^0.4.0",
-        "wpackagist-plugin/debug-bar": "^0.9.0",
-        "wpackagist-plugin/genesis-visual-hook-guide": "^1.0",
-        "wpackagist-plugin/debug-bar-extender": "^0.5",
-        "wpackagist-plugin/piglatin": "^0.2",
-        "wpackagist-plugin/query-monitor": "^2.7",
-        "wpackagist-plugin/rewrite-rules-inspector": "^1.2",
-        "wpackagist-plugin/user-switching": "^1.0",
-        "wpackagist-plugin/what-the-file": "^1.4",
-        "wpackagist-plugin/wp-crontrol": "^1.2",
-        "wpackagist-plugin/gravityformscli": "^1.0",
-        "wpackagist-plugin/widget-importer-exporter": "^1.5"
+        "wpackagist-plugin/log-deprecated-notices": ">=0.4.0",
+        "wpackagist-plugin/debug-bar": ">=0.9.0",
+        "wpackagist-plugin/genesis-visual-hook-guide": ">=1.0",
+        "wpackagist-plugin/debug-bar-extender": ">=0.5",
+        "wpackagist-plugin/piglatin": ">=0.2",
+        "wpackagist-plugin/query-monitor": ">=2.7",
+        "wpackagist-plugin/rewrite-rules-inspector": ">=1.2",
+        "wpackagist-plugin/user-switching": ">=1.0",
+        "wpackagist-plugin/what-the-file": ">=1.4",
+        "wpackagist-plugin/wp-crontrol": ">=1.2",
+        "wpackagist-plugin/gravityformscli": ">=1.0",
+        "wpackagist-plugin/widget-importer-exporter": ">=1.5"
     },
     "extra": {
         "installer-paths": {
