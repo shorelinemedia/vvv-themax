@@ -73,7 +73,7 @@ hosts:
     - bar.dev
     - baz.dev
 ```
-Defines the domains and hosts for VVV to listen on. 
+Defines the domains and hosts for VVV to listen on.
 The first domain in this list is your sites primary domain.
 
 ```
@@ -110,4 +110,7 @@ custom:
 ```
 Defines the DB name for the installation.
 
+#### TODOS
 
+1. Remove Hello Dolly and other stock plugins during provisioning
+2. Install our composer provisioned plugins via provisioning
