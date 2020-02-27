@@ -167,12 +167,6 @@ yarn_global() {
 
 # Setup Composer
 setup_composer() {
-  cd ${VVV_PATH_TO_SITE}
-  php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-  php -r "if (hash_file('SHA384', 'composer-setup.php') === '669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-  php composer-setup.php
-  php -r "unlink('composer-setup.php');"
-
   # Install composer required libraries
   cd ${VVV_PATH_TO_SITE}
   noroot composer update && noroot composer install --no-dev
@@ -238,8 +232,8 @@ else
 fi
 
 setup_composer
-yarn_global
 install_yarn
+yarn_global
 
 # Install Liquidprompt on first provision only
 if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
