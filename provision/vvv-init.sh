@@ -81,6 +81,16 @@ END_HEREDOC
   fi
 }
 
+setup_nginx_certificates() {
+  if /srv/config/homebin/is_utility_installed core tls-ca; then
+    sed -i "s#{vvv_tls_cert}#ssl_certificate /srv/certificates/${VVV_SITE_NAME}/dev.crt;#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+    sed -i "s#{vvv_tls_key}#ssl_certificate_key /srv/certificates/${VVV_SITE_NAME}/dev.key;#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  else
+    sed -i "s#{vvv_tls_cert}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+    sed -i "s#{vvv_tls_key}##" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+  fi
+}
+
 initial_wpconfig() {
   echo "Configuring WordPress Stable..."
   WP_CACHE_KEY_SALT=`date +%s | sha256sum | head -c 64`
@@ -181,6 +191,8 @@ copy_nginx_configs
 
 # Replace domains in config template
 sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx.conf"
+
+setup_nginx_certificates
 
 cd ${VVV_PATH_TO_SITE}/public_html
 
