@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Provision WordPress Stable
 
+# Quit out of the provisioner if something fails, like checking out htdocs
 set -eo pipefail
 
 echo " * Custom site template provisioner ${VVV_SITE_NAME} - downloads and installs a copy of WP stable for testing, building client sites, etc"
@@ -210,6 +211,33 @@ add_webp_express_to_nginx() {
 
 }
 
+# Checkout HTDOCS repo
+checkout_htdocs_repo() {
+  if [[ ! -z "$HTDOCS_REPO" ]]; then
+
+    # Only checkout GIT repo on initial provision
+    if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
+      cd ${VVV_PATH_TO_SITE}/public_html
+
+
+      # Setup our WPEngine starter project in the htdocs/public_html folder
+      # before that folder is created
+      echo "Checking out project from ${HTDOCS_REPO} to ${VVV_PATH_TO_SITE}/public_html/"
+
+
+      # Create git repository, add origin remote and do first pull
+      echo "Initializing git repo in htdocs/public_html folder"
+      noroot git init
+      echo "Adding git remote"
+      noroot git remote add origin "${HTDOCS_REPO}"
+      echo "Pulling master branch from ${HTDOCS_REPO}"
+      noroot git pull --recurse-submodules origin master --force
+      cd ${VVV_PATH_TO_SITE}
+    fi
+
+  fi
+}
+
 configure_keys
 setup_database
 setup_nginx_folders
@@ -222,27 +250,9 @@ sed -i "s#{{DOMAINS_HERE}}#${DOMAINS}#" "${VVV_PATH_TO_SITE}/provision/vvv-nginx
 
 setup_nginx_certificates
 add_webp_express_to_nginx
+checkout_htdocs_repo
 
 cd ${VVV_PATH_TO_SITE}/public_html
-
-if [ ! -z "$HTDOCS_REPO" ]; then
-
-  # Setup our WPEngine starter project in the htdocs/public_html folder
-  # before that folder is created
-  echo "Checking out WPEngine starter project at ${HTDOCS_REPO}"
-
-
-  # Create git repository, add origin remote and do first pull
-  echo "Initializing git repo in htdocs/public_html folder"
-  git init
-  echo "Adding git remote"
-  git remote add origin "${HTDOCS_REPO}"
-  echo "Pulling master branch from ${HTDOCS_REPO}"
-  git pull --recurse-submodules origin master
-  cd ${VVV_PATH_TO_SITE}
-
-fi
-
 
 # Install and configure the latest stable version of WordPress
 if [[ ! -f "${VVV_PATH_TO_SITE}/public_html/wp-load.php" ]]; then
