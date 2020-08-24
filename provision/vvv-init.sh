@@ -108,6 +108,7 @@ define( 'WP_DISABLE_FATAL_ERROR_HANDLER', true );
 define( 'SAVEQUERIES', false );
 define( 'JETPACK_DEV_DEBUG', true );
 @ini_set( 'display_errors', 0 );
+define( 'WP_ENVIRONMENT_TYPE', 'development' );
 define( 'WP_LOCAL_DEV', true );
 define( 'WP_ENV', 'development' );
 // Disable File Editor
