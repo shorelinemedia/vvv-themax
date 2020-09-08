@@ -1,6 +1,6 @@
 server {
     listen       80;
-    listen       443 ssl;
+    listen       443 ssl http2;
     server_name  {{DOMAINS_HERE}};
     root         {vvv_path_to_site}/public_html;
 
@@ -9,15 +9,28 @@ server {
 
     set          $upstream {upstream};
 
+    # Enable server push if SSL/HTTP2 is being used for link preload headers
+    http2_push_preload on;
+
+    {vvv_tls_cert}
+    {vvv_tls_key}
+
     include      /etc/nginx/nginx-wp-common.conf;
 
+    {{WEBP_EXPRESS}}
+
+    {{LIVE_URL}}
+    
 #   rewrite (.+)?(^wp-.*) /$2 last;
 #   rewrite ^(.+)?/(wp-.*) /$2 last;
 #   rewrite ^(.+)?/(wp-(content|admin|includes).*) /$2 last;
     rewrite ^(.+)?\/(wp-(content(?!\.css)|admin|includes).*) /$2 last;
-    rewrite ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 last;
+    rewrite ^([_0-9a-zA-Z-]+/)?(.*\.php)$ $2 last;    
 
-    ssl on;
-    ssl_certificate /vagrant/certificates/{vvv_db_name}/dev.crt;
-    ssl_certificate_key /vagrant/certificates/{vvv_db_name}/dev.key;
+    # Webfont CORS Support for Multisite
+    location ~* \.(eot|ttf|woff|woff2)$ {
+        add_header Access-Control-Allow-Origin *;
+    }
+
+
 }
