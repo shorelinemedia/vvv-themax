@@ -151,7 +151,7 @@ install_liquidprompt() {
   noroot cp /home/vagrant/liquidprompt/liquidpromptrc-dist /home/vagrant/.config/liquidpromptrc
 
   # Add to .bashrc
-  noroot cat <<EOF >> /home/vagrant/.bashrc
+  noroot cat <<- "EOF" >> /home/vagrant/.bashrc
 
 # Only load Liquid Prompt in interactive shells, not from a script or from scp
 [[ $- = *i* ]] && source /home/vagrant/liquidprompt/liquidprompt
