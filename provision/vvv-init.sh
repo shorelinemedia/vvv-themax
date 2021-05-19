@@ -98,8 +98,6 @@ initial_wpconfig() {
   WP_CACHE_KEY_SALT=`date +%s | sha256sum | head -c 64`
   noroot wp core config --dbname="${DB_NAME}" --dbuser=wp --dbpass=wp --quiet --extra-php <<PHP
 
-define( 'WP_CACHE', true );
-define( 'WP_CACHE_KEY_SALT', '$WP_CACHE_KEY_SALT' );
 define( 'WP_DEBUG', true );
 define( 'WP_DEBUG_LOG', true );
 define( 'WP_DEBUG_DISPLAY', false );
