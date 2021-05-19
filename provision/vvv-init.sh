@@ -120,7 +120,8 @@ define( 'WPMS_MAILER', 'smtp' );
 define( 'WPMS_SMTP_HOST', 'vvv.test' );
 define( 'WPMS_SMTP_PORT', '1025' );
 define( 'WPMS_SMTP_AUTH', false );
-
+define( 'WPMS_SMTP_AUTOTLS', false );
+define( 'WPMS_SSL', '' );
 
 
 /** Contact Form 7 **/
