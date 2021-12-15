@@ -236,6 +236,8 @@ checkout_htdocs_repo() {
 }
 
 replace_custom_provision_scripts() {
+  # Copy conf file with curly brace placeholders to actual file not controlled by git
+  cp "${VVV_PATH_TO_SITE}/provision/.update-local.sh.conf" "${VVV_PATH_TO_SITE}/provision/update-local.sh"
   sed -i "s#{vvv_primary_domain}#${DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/update-local.sh"
   sed -i "s#{vvv_site_name}#${VVV_SITE_NAME}#" "${VVV_PATH_TO_SITE}/provision/update-local.sh"
 }
