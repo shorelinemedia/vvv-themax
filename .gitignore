@@ -1,6 +1,7 @@
 
 /log/
 /provision/vvv-nginx.conf
+/provision/update-local.sh
 composer.phar
 /public_html
 composer.lock
