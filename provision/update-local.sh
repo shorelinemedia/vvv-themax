@@ -1,0 +1,280 @@
+#!/usr/bin/env bash
+
+# Quit on error
+set -eo pipefail
+
+###
+# Command line flags
+#
+# -y    Forces yes to all prompts
+###
+
+###
+# NOTES:
+#
+# * NOT MULTISITE COMPATIBLE YET
+###
+
+###
+# CONFIG VARIABLES
+#
+# After saving script, change config variables below to customize for this project
+#
+###
+
+SOURCEDOMAIN="{vvv_primary_domain}" # LOCAL DEVELOPMENT DOMAIN
+TARGETDOMAIN="{vvv_primary_domain}" # REMOTE DOMAIN
+WPE_INSTALL="{vvv_site_name}" # If you omit the WPE_INSTALL variable you'll be prompted for SSH credentials
+PWD=$(pwd)
+SOURCE_HOME_PATH="$PWD/public_html" # Assumes this script lives above your current public directory
+
+SSH_KEY="~/.ssh/id_rsa"
+
+EXPORT_DB_NAME="$WPE_INSTALL.sql"
+EXPORT_DB_PATH="/srv/database/exports"
+BACKUP_DB_NAME="backup.sql"
+BACKUP_DB_PATH="/srv/database/exports"
+
+SOURCE_WP_CONFIG_PATH="$SOURCE_HOME_PATH/wp-config.php"
+
+
+
+
+
+##
+# Command line flags
+##
+
+## -y Force yes to all prompts
+
+# Optional default values for optional flags
+force_yes=false
+
+## Get options from command line flags
+while getopts y flag
+do
+        case "${flag}" in
+                y) force_yes=true;;
+        esac
+done
+
+##
+# Helper functions
+##
+
+
+function pause(){
+  if [ ! -z "$1" ]; then
+    read -s -r -n 1 -p "$1"
+  else
+    read -s -r -n 1 -p "Press any key to continue..."
+  fi
+  echo ""
+}
+
+# Remote Command
+# Ex: remote_cmd "cd $TARGET_PATH/$SSH_USER ; ls -lha"
+remote_cmd () {
+  # Expects first argument to be a command to run on a remote connection
+
+  # If there is an argument
+  if [ ! -z "$1" ]
+  then
+    ssh $SSH_USER@$SSH_HOSTNAME "$1"
+  fi
+}
+
+# Create directory if it doesn't exist
+# Ex: create_if_not_exist "/srv/database/exports"
+create_if_not_exist () {
+  if [[ ! -d "$1" ]]; then
+    mkdir $1
+  fi
+}
+
+# WP Search Replace
+# Args: SOURCEDOMAIN, SOURCEURL, TARGETURL, TARGETDOMAIN, SOURCE_WP_CONFIG_PATH,
+# EXPORT_DB_PATH, EXPORT_DB_NAME
+search_replace () {
+
+if $(wp --url="$2" core is-installed --network); then
+    # Replace domain in tables
+    wp search-replace --url=$2 $1 $4 wp_site 'wp_*options' wp_blogs
+    sed -i "s/'DOMAIN_CURRENT_SITE', '$1'/'DOMAIN_CURRENT_SITE', '$4'/g" $5
+
+    # Search Replace and export db
+    wp search-replace --url="$3" "$2" "$3" --recurse-objects --network --skip-columns=guid --skip-tables=wp_users --all-tables
+    wp db export "$6/$7"
+
+else
+    wp search-replace $2 $3 --recurse-objects --skip-columns=guid --all-tables --skip-tables=wp_users
+    wp db export "$6/$7"
+
+fi
+
+
+}
+
+
+
+
+
+
+
+
+# Gather info through user input/confirmation
+
+# Local Config
+read -e -i "$SOURCEDOMAIN" -p "What is the LOCAL domain?: " input
+SOURCEDOMAIN=${input:-$SOURCEDOMAIN}
+
+
+SOURCEURL="https://$SOURCEDOMAIN"
+read -e -i "$SOURCEURL" -p "What is the LOCAL URL?: " input
+SOURCEURL="${input:-$SOURCEURL}"
+
+
+# Remote Config
+
+read -e -i "$TARGETDOMAIN" -p "What is the REMOTE domain?: " input
+TARGETDOMAIN="${input:-$TARGETDOMAIN}"
+
+TARGETURL="https://$TARGETDOMAIN"
+read -e -i "$TARGETURL" -p "What is the REMOTE URL?: " input
+TARGETURL="${input:-$TARGETURL}"
+
+read -e -i "$WPE_INSTALL" -p "What is WPE Install name?: " input
+if [ ! -z "$input" ]; then
+  WPE_INSTALL=$input
+else
+  WPE_INSTALL=""
+fi
+
+# Support non-WPE hosts
+if [ ! -z "$WPE_INSTALL" ]; then
+  SSH_USER="$WPE_INSTALL"
+  SSH_HOSTNAME="$SSH_USER.ssh.wpengine.net"
+  TARGET_PATH="/home/wpe-user/sites/$WPE_INSTALL"
+else
+  read -e -i "$WPE_INSTALL" -p "What is the project slug?: " input
+  WPE_INSTALL="${input:-$WPE_INSTALL}"
+  read -e -i "$SSH_USER" -p "What is the SSH Username?: " input
+  SSH_USER="$input"
+  read -e -i "$SSH_HOSTNAME" -p "What is the SSH Hostname?: " input
+  SSH_HOSTNAME="$input"
+  read -e -i "~/public_html" -p "What is the remote path?: " input
+  TARGET_PATH="$input"
+fi
+
+read -e -i "$SOURCE_HOME_PATH" -p "What is the local file path to your wordpress install (no trailing slash)?: " input
+SOURCE_HOME_PATH="${input:-$SOURCE_HOME_PATH}"
+
+# Backup local database
+read -e -i "$EXPORT_DB_PATH" -p "Database export location (no trailing slash): " EXPORT_DB_PATH
+
+# Backup DB Name
+read -e -i "$BACKUP_DB_NAME" -p "Backup DB Name: " BACKUP_DB_PATH
+
+# Export DB Name
+read -e -i "$WPE_INSTALL.sql" -p "Export DB Name: " EXPORT_DB_NAME
+
+
+
+echo -e "\n"
+
+echo "Local domain: $SOURCEDOMAIN"
+echo "Local URL: $SOURCEURL"
+echo "Remote domain: $TARGETDOMAIN"
+echo "Remote URL: $TARGETURL"
+ 
+# Create SSH path variable for wp-cli remote commands
+WP_CLI_REMOTE_PATH="${SSH_USER}@${SSH_HOSTNAME}${TARGET_PATH}"
+echo "WP-CLI Remote Path: $WP_CLI_REMOTE_PATH"
+
+echo "Database export location: $EXPORT_DB_PATH"
+
+# Pause before beginning
+echo -e "\n"
+pause "Press any key to begin..."
+echo -e "\n"
+
+# Create Backup folder of local db
+if [ ! -z "$EXPORT_DB_PATH" ]; then
+  # Create export folder
+  echo "Maybe creating db backup folder"
+  create_if_not_exist "$EXPORT_DB_PATH"
+fi
+
+# Update WP Core
+CORE_PROD=$(wp core version --ssh="$WP_CLI_REMOTE_PATH/wp-content/")
+CORE_LOCAL=$(wp core version)
+
+if [ "$CORE_LOCAL" != "$CORE_PROD" ]; then
+  if [ "$force_yes" == false ]; then
+    read -e -p "Update local WP core to match WP core on target (Local: $CORE_LOCAL; Target: $CORE_PROD?) [y/n] " UPDATE_CORE
+  else
+    UPDATE_CORE="y"
+  fi
+  
+  if [ $UPDATE_CORE == "y" ]; then
+    CURRENT_DIR=$(pwd)
+    cd $SOURCE_HOME_PATH;
+    wp core download --version="$CORE_PROD" --force
+    cd $CURRENT_DIR
+  fi
+fi
+
+# Update Plugins
+if [ "$force_yes" == false ]; then
+  read -e -p "Sync plugins? [y/n] " SYNC_PLUGINS
+else
+  SYNC_PLUGINS="y"
+fi
+
+if [ $SYNC_PLUGINS == "y" ]; then
+  echo "Syncing plugins..."
+  rsync -avz "$SSH_USER@$SSH_HOSTNAME:$TARGET_PATH/wp-content/plugins/" "$SOURCE_HOME_PATH/wp-content/plugins/"
+fi
+
+# Update Media
+if [ "$force_yes" == false ]; then
+  read -e -p "Sync uploads/media? [y/n] " SYNC_UPLOADS
+else
+  SYNC_UPLOADS="y"
+fi
+
+if [ $SYNC_UPLOADS == "y" ]; then
+  echo "Syncing uploads..."
+  rsync -avz "$SSH_USER@$SSH_HOSTNAME:$TARGET_PATH/wp-content/uploads/" "$SOURCE_HOME_PATH/wp-content/uploads/"
+fi
+
+# Export db on server
+# Import target database
+if [ "$force_yes" == false ]; then
+  read -e -p "Export database on server and import locally? [y/n] " UPDATE_DB
+else
+  UPDATE_DB="y"
+fi
+
+if [ $UPDATE_DB == "y" ]; then
+  echo "Exporting database and importing locally"
+  wp db export --ssh="${WP_CLI_REMOTE_PATH}/wp-content/" "$WPE_INSTALL.sql"
+  rsync -avz "$SSH_USER@$SSH_HOSTNAME:$TARGET_PATH/wp-content/$WPE_INSTALL.sql" "$SOURCE_HOME_PATH/wp-content/"
+  wp db reset --yes
+  wp db import "$SOURCE_HOME_PATH/wp-content/$WPE_INSTALL.sql"
+fi
+
+
+# Search/replace 
+# @TODO: Add multisite
+
+if [ $UPDATE_DB == "y" ]; then
+  if [ "$SOURCEURL" != "$TARGETURL" ]; then
+    wp search-replace --skip-columns=guid --recurse-objects --all-tables "http://$TARGETDOMAIN" "$SOURCEURL"
+    wp search-replace --skip-columns=guid --recurse-objects --all-tables "https://$TARGETDOMAIN" "$SOURCEURL"
+    wp cache flush
+  else
+    echo "No need to search/replace database-- the URLs are the same!"
+  fi
+fi
+

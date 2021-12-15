@@ -235,6 +235,11 @@ checkout_htdocs_repo() {
   fi
 }
 
+replace_custom_provision_scripts() {
+  sed -i "s#{vvv_primary_domain}#${DOMAIN}#" "${VVV_PATH_TO_SITE}/provision/update-local.sh"
+  sed -i "s#{vvv_site_name}#${VVV_SITE_NAME}#" "${VVV_PATH_TO_SITE}/provision/update-local.sh"
+}
+
 configure_keys
 setup_database
 setup_nginx_folders
@@ -287,6 +292,9 @@ yarn_global
 if [[ ! -d "/home/vagrant/liquidprompt" ]]; then
   install_liquidprompt
 fi
+
+# Replace variables in custom provision scripts
+replace_custom_provision_scripts
 
 
 echo " * Site Template provisioner script completed for ${VVV_SITE_NAME}"
