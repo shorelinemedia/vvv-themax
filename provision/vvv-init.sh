@@ -178,7 +178,9 @@ yarn_global() {
 setup_composer() {
   # Install composer required libraries
   cd ${VVV_PATH_TO_SITE}
-  noroot composer update && noroot composer install --no-dev
+  noroot composer update 
+  # noroot composer install --no-dev
+  echo -e "Run 'composer install --no-dev' to install base plugins and 'composer install --dev' to install developer plugins"
 }
 
 # Add nginx rules to support webp express plugin
