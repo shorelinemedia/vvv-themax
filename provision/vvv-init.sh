@@ -117,6 +117,11 @@ define( 'WPMS_SMTP_PORT', '1025' );
 define( 'WPMS_SMTP_AUTH', false );
 define( 'WPMS_SMTP_AUTOTLS', false );
 define( 'WPMS_SSL', '' );
+define( 'WPMS_SMTP_USER', '' );
+define( 'WPMS_SMTYP_PASS', '' );
+define( 'WPMS_SMTP_AUTOTLS', false );
+define( 'WPMS_SSL', '' );
+
 /* Disable ManageWP plugin for local/dev */
 define( 'MWP_SKIP_BOOTSTRAP', true );
 
