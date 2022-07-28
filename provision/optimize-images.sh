@@ -21,17 +21,22 @@ do
   esac
 done
 
+#echo "$DIR"
+#echo "$MAXQUALITY"
+#echo "$CONVERTPNG"
+
+if [ "$CONVERTPNG" != false ]; then
+  # Convert actual PNGs to JPGs
+  echo "Converting actual PNGs files to JPG"
+  find "$DIR" -type f -name "*.png" | sed 's/\.png$//' | xargs -I% convert -quality "$MAXQUALITY" "%.png" "%.jpg"
+  find "$DIR" -type f -name "*.png" -exec rm {} +
+fi
+
 # Convert fake jpgs to jpgs (files that are actually png but have .jpg filename)
 # Use imagemagicks convert command
 find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -exec convert {} {} \;
 
-if [ -z $CONVERTPNG ]; then
-  # Convert actual PNGs to JPGs
-  find "$DIR" -type f -name "*.png" | sed 's/\.png$//' | xargs -I% convert %.png -quality "$MAXQUALITY" %.jpg
-  find "$DIR" -type f -name "*.png" -exec rm {} \;
-fi
-
-#find "$DIR" -type f -iname "*.png" -exec echo basename {} \;
-
+# Optimize JPGs
 find "$DIR" -type f -iname "*.png" -exec pngquant -f --ext .png --verbose --quality 0-"$MAXQUALITY" -s 1 -- {} \;
+# Optimize PNGs
 find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -exec jpegoptim -m"$MAXQUALITY" -f --strip-all {} \;
