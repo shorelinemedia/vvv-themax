@@ -5,17 +5,19 @@
 # Ex: ./optimize-images.sh -d /srv/www/mysite/public_html/wp-content/uploads/
 
 # Check to make sure pngquant and jpegoptim are installed by running each command. If not installed, run
-# sudo apt-get install pngquant jpegoptim imagemagick
+# sudo apt-get install pngquant jpegoptim
 
 # Optional default values for optional flags
 DIR=$(pwd)
 MAXQUALITY="60"
+CONVERTPNG=false
 
-while getopts 'd:q:' c
+while getopts 'd:q:c:' c
 do
   case $c in
     d) DIR="$OPTARG" ;;
     q) MAXQUALITY="$OPTARG" ;;
+    c) CONVERTPNG="$OPTARG" ;;
   esac
 done
 
@@ -23,6 +25,11 @@ done
 # Use imagemagicks convert command
 find "$DIR" -type f \( -iname "*.jpg" -o -iname "*.jpeg" \) -exec convert {} {} \;
 
+if [ -z $CONVERTPNG ]; then
+  # Convert actual PNGs to JPGs
+  find "$DIR" -type f -name "*.png" | sed 's/\.png$//' | xargs -I% convert %.png -quality "$MAXQUALITY" %.jpg
+  find "$DIR" -type f -name "*.png" -exec rm {} \;
+fi
 
 #find "$DIR" -type f -iname "*.png" -exec echo basename {} \;
 
